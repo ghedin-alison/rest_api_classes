@@ -10,8 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
-# token
+# token alison
 # 6dd4a793aeed311127aca5e55f81974e3a926068
+#Token Fran(wendytestaburguer)
+# 191d0038054b9b3bd444d8ceef0be638678d8a26
+
 
 
 import os
