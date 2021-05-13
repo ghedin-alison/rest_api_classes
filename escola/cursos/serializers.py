@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Curso, Avaliacao
-
+from django.db.models import Avg
 
 class AvaliacaoSerializer(serializers.ModelSerializer):
 
@@ -21,6 +21,12 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
             'ativo'
         )
 
+#validacao tem q comecar com validate_ e utilizar o nome declarado no fields
+    def validate_avaliacao(self, valor):
+        if valor <= 5:
+            return valor
+        raise serializers.ValidationError('A avaliação precisa ser um valor entre 1 e 5')
+
 
 class CursoSerializer(serializers.ModelSerializer):
     # nested relationship(ideal para one to one - concatena informações)
@@ -33,6 +39,10 @@ class CursoSerializer(serializers.ModelSerializer):
 
     # Primary Key Related Field(cria só com id relacionado)
     avaliacoes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    # para utilizar SerializerMethodField, é preciso de um método com
+    # nome get_xxxx, onde xxx é o nome do campo do serializer(isso é padrão)
+    media_avaliacoes = serializers.SerializerMethodField()
     class Meta:
         model = Curso
         fields = (
@@ -41,5 +51,13 @@ class CursoSerializer(serializers.ModelSerializer):
             'url',
             'criacao',
             'ativo',
-            'avaliacoes'
+            'avaliacoes',
+            'media_avaliacoes'
         )
+
+    def get_media_avaliacoes(self, obj):
+        media = obj.avaliacoes.aggregate(Avg('avaliacao')).get('avaliacao__avg')
+
+        if media is None:
+            return 0
+        return round(media * 2 ) / 2
